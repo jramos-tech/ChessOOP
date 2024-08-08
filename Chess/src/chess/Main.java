@@ -1,4 +1,5 @@
 package chess;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -6,6 +7,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import pieces.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -13,10 +15,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Random;
 
 /**
  * @author Ashish Kedia and Adarsh Mohata
- *
  */
 
 
@@ -24,233 +26,205 @@ import java.util.ListIterator;
  * This is the Main Class of our project.
  * All GUI Elements are declared, initialized and used in this class itself.
  * It is inherited from the JFrame Class of Java's Swing Library. 
- * 
+ *
  */
 
-public class Main extends JFrame implements MouseListener
-{
-	private static final long serialVersionUID = 1L;
-	
-	//Variable Declaration
-	private static final int Height=700;
-	private static final int Width=1110;
-	private static Rook wr01,wr02,br01,br02;
-	private static Knight wk01,wk02,bk01,bk02;
-	private static Bishop wb01,wb02,bb01,bb02;
-	private static Pawn wp[],bp[];
-	private static Queen wq,bq;
-	private static King wk,bk;
-	private Cell c,previous;
-	private int chance=0;
-	private Cell boardState[][];
-	private ArrayList<Cell> destinationlist = new ArrayList<Cell>();
-	private Player White=null,Black=null;
-	private JPanel board=new JPanel(new GridLayout(8,8));
-	private JPanel wdetails=new JPanel(new GridLayout(3,3));
-	private JPanel bdetails=new JPanel(new GridLayout(3,3));
-	private JPanel wcombopanel=new JPanel();
-	private JPanel bcombopanel=new JPanel();
-	private JPanel controlPanel,WhitePlayer,BlackPlayer,temp,displayTime,showPlayer,time;
-	private JSplitPane split;
-	private JLabel label,mov;
-	private static JLabel CHNC;
-	private Time timer;
-	public static Main Mainboard;
-	private boolean selected=false,end=false;
-	private Container content;
-	private ArrayList<Player> wplayer,bplayer;
-	private ArrayList<String> Wnames=new ArrayList<String>();
-	private ArrayList<String> Bnames=new ArrayList<String>();
-	private JComboBox<String> wcombo,bcombo;
-	private String wname=null,bname=null,winner=null;
-	static String move;
-	private Player tempPlayer;
-	private JScrollPane wscroll,bscroll;
-	private String[] WNames={},BNames={};
-	private JSlider timeSlider;
-	private BufferedImage image;
-	private Button start,wselect,bselect,WNewPlayer,BNewPlayer;
-	public static int timeRemaining=60;
-	public static void main(String[] args){
-	
-	//variable initialization
-	wr01=new Rook("WR01","White_Rook.png",0);
-	wr02=new Rook("WR02","White_Rook.png",0);
-	br01=new Rook("BR01","Black_Rook.png",1);
-	br02=new Rook("BR02","Black_Rook.png",1);
-	wk01=new Knight("WK01","White_Knight.png",0);
-	wk02=new Knight("WK02","White_Knight.png",0);
-	bk01=new Knight("BK01","Black_Knight.png",1);
-	bk02=new Knight("BK02","Black_Knight.png",1);
-	wb01=new Bishop("WB01","White_Bishop.png",0);
-	wb02=new Bishop("WB02","White_Bishop.png",0);
-	bb01=new Bishop("BB01","Black_Bishop.png",1);
-	bb02=new Bishop("BB02","Black_Bishop.png",1);
-	wq=new Queen("WQ","White_Queen.png",0);
-	bq=new Queen("BQ","Black_Queen.png",1);
-	wk=new King("WK","White_King.png",0,7,3);
-	bk=new King("BK","Black_King.png",1,0,3);
-	wp=new Pawn[8];
-	bp=new Pawn[8];
-	for(int i=0;i<8;i++)
-	{
-		wp[i]=new Pawn("WP0"+(i+1),"White_Pawn.png",0);
-		bp[i]=new Pawn("BP0"+(i+1),"Black_Pawn.png",1);
-	}
-	
-	//Setting up the board
-	Mainboard = new Main();
-	Mainboard.setVisible(true);	
-	Mainboard.setResizable(false);
-	}
-	
-	//Constructor
-	private Main()
-    {
-		timeRemaining=60;
-		timeSlider = new JSlider();
-		move="White";
-		wname=null;
-		bname=null;
-		winner=null;
-		board=new JPanel(new GridLayout(8,8));
-		wdetails=new JPanel(new GridLayout(3,3));
-		bdetails=new JPanel(new GridLayout(3,3));
-		bcombopanel=new JPanel();
-		wcombopanel=new JPanel();
-		Wnames=new ArrayList<String>();
-		Bnames=new ArrayList<String>();
-		board.setMinimumSize(new Dimension(800,700));
-		ImageIcon img = new ImageIcon(this.getClass().getResource("icon.png"));
-		this.setIconImage(img.getImage());
-		
-		//Time Slider Details
-		timeSlider.setMinimum(1);
-		timeSlider.setMaximum(15);
-		timeSlider.setValue(1);
-		timeSlider.setMajorTickSpacing(2);
-		timeSlider.setPaintLabels(true);
-		timeSlider.setPaintTicks(true);
-		timeSlider.addChangeListener(new TimeChange());
-		
-		
-		//Fetching Details of all Players
-		wplayer= Player.fetch_players();
-		Iterator<Player> witr=wplayer.iterator();
-		while(witr.hasNext())
-			Wnames.add(witr.next().name());
-				
-		bplayer= Player.fetch_players();
-		Iterator<Player> bitr=bplayer.iterator();
-		while(bitr.hasNext())
-			Bnames.add(bitr.next().name());
-	    WNames=Wnames.toArray(WNames);	
-		BNames=Bnames.toArray(BNames);
-		
-		Cell cell;
-		board.setBorder(BorderFactory.createLoweredBevelBorder());
-		pieces.Piece P;
-		content=getContentPane();
-		setSize(Width,Height);
-		setTitle("Chess");
-		content.setBackground(Color.black);
-		controlPanel=new JPanel();
-		content.setLayout(new BorderLayout());
-		controlPanel.setLayout(new GridLayout(3,3));
-		controlPanel.setBorder(BorderFactory.createTitledBorder(null, "Statistics", TitledBorder.TOP,TitledBorder.CENTER, new Font("Lucida Calligraphy",Font.PLAIN,20), Color.ORANGE));
-		
-		//Defining the Player Box in Control Panel
-		WhitePlayer=new JPanel();
-		WhitePlayer.setBorder(BorderFactory.createTitledBorder(null, "White Player", TitledBorder.TOP,TitledBorder.CENTER, new Font("times new roman",Font.BOLD,18), Color.RED));
-		WhitePlayer.setLayout(new BorderLayout());
-		
-		BlackPlayer=new JPanel();
-		BlackPlayer.setBorder(BorderFactory.createTitledBorder(null, "Black Player", TitledBorder.TOP,TitledBorder.CENTER, new Font("times new roman",Font.BOLD,18), Color.BLUE));
-	    BlackPlayer.setLayout(new BorderLayout());
-		
-	    JPanel whitestats=new JPanel(new GridLayout(3,3));
-		JPanel blackstats=new JPanel(new GridLayout(3,3));
-		wcombo=new JComboBox<String>(WNames);
-		bcombo=new JComboBox<String>(BNames);
-		wscroll=new JScrollPane(wcombo);
-		bscroll=new JScrollPane(bcombo);
-		wcombopanel.setLayout(new FlowLayout());
-		bcombopanel.setLayout(new FlowLayout());
-		wselect=new Button("Select");
-		bselect=new Button("Select");
-		wselect.addActionListener(new SelectHandler(0));
-		bselect.addActionListener(new SelectHandler(1));
-		WNewPlayer=new Button("New Player");
-		BNewPlayer=new Button("New Player");
-		WNewPlayer.addActionListener(new Handler(0));
-		BNewPlayer.addActionListener(new Handler(1));
-		wcombopanel.add(wscroll);
-		wcombopanel.add(wselect);
-		wcombopanel.add(WNewPlayer);
-		bcombopanel.add(bscroll);
-		bcombopanel.add(bselect);
-		bcombopanel.add(BNewPlayer);
-		WhitePlayer.add(wcombopanel,BorderLayout.NORTH);
-		BlackPlayer.add(bcombopanel,BorderLayout.NORTH);
-		whitestats.add(new JLabel("Name   :"));
-		whitestats.add(new JLabel("Played :"));
-		whitestats.add(new JLabel("Won    :"));
-		blackstats.add(new JLabel("Name   :"));
-		blackstats.add(new JLabel("Played :"));
-		blackstats.add(new JLabel("Won    :"));
-		WhitePlayer.add(whitestats,BorderLayout.WEST);
-		BlackPlayer.add(blackstats,BorderLayout.WEST);
-		controlPanel.add(WhitePlayer);
-		controlPanel.add(BlackPlayer);
-		
-		
-		//Defining all the Cells
-		boardState=new Cell[8][8];
-		for(int i=0;i<8;i++)
-			for(int j=0;j<8;j++)
-			{	
-				P=null;
-				if(i==0&&j==0)
-					P=br01;
-				else if(i==0&&j==7)
-					P=br02;
-				else if(i==7&&j==0)
-					P=wr01;
-				else if(i==7&&j==7)
-					P=wr02;
-				else if(i==0&&j==1)
-					P=bk01;
-				else if (i==0&&j==6)
-					P=bk02;
-				else if(i==7&&j==1)
-					P=wk01;
-				else if (i==7&&j==6)
-					P=wk02;
-				else if(i==0&&j==2)
-					P=bb01;
-				else if (i==0&&j==5)
-					P=bb02;
-				else if(i==7&&j==2)
-					P=wb01;
-				else if(i==7&&j==5)
-					P=wb02;
-				else if(i==0&&j==3)
-					P=bk;
-				else if(i==0&&j==4)
-					P=bq;
-				else if(i==7&&j==3)
-					P=wk;
-				else if(i==7&&j==4)
-					P=wq;
-				else if(i==1)
-				P=bp[j];
-				else if(i==6)
-					P=wp[j];
-				cell=new Cell(i,j,P);
-				cell.addMouseListener(this);
-				board.add(cell);
-				boardState[i][j]=cell;
-			}
+public class Main extends JFrame implements MouseListener {
+    private static final long serialVersionUID = 1L;
+
+    //Variable Declaration
+    private static final int Height = 700;
+    private static final int Width = 1110;
+    private static Rook wr01, wr02, br01, br02;
+    private static Knight wk01, wk02, bk01, bk02;
+    private static Bishop wb01, wb02, bb01, bb02;
+    private static Pawn wp[], bp[];
+    private static Queen wq, bq;
+    private static King wk, bk;
+    private Cell c, previous;
+    private int chance = 0;
+    private Cell boardState[][];
+    private ArrayList<Cell> destinationlist = new ArrayList<Cell>();
+    private Player White = null, Black = null;
+    private JPanel board = new JPanel(new GridLayout(8, 8));
+    private JPanel wdetails = new JPanel(new GridLayout(3, 3));
+    private JPanel bdetails = new JPanel(new GridLayout(3, 3));
+    private JPanel wcombopanel = new JPanel();
+    private JPanel bcombopanel = new JPanel();
+    private JPanel gamecombopanel = new JPanel();
+    private JPanel controlPanel, WhitePlayer, BlackPlayer, temp, displayTime, showPlayer, time;
+    private JSplitPane split;
+    private JLabel label, mov;
+    private static JLabel CHNC;
+    private Time timer;
+    public static Main Mainboard;
+    private boolean selected = false, end = false, chess960 = false;
+    private Container content;
+    private ArrayList<Player> wplayer, bplayer;
+    private ArrayList<String> Wnames = new ArrayList<String>();
+    private ArrayList<String> Bnames = new ArrayList<String>();
+    private JComboBox<String> wcombo, bcombo, gamecombo;
+    private String wname = null, bname = null, winner = null;
+    static String move;
+    private Player tempPlayer;
+    private JScrollPane wscroll, bscroll, gamescroll;
+    private String[] WNames = {}, BNames = {}, gamemodes = {"normal", "chess960"};
+    private JSlider timeSlider;
+    private BufferedImage image;
+    private Button start, wselect, bselect, gameselect, WNewPlayer, BNewPlayer;
+    public static int timeRemaining = 60;
+    public Cell cell;
+    pieces.Piece P;
+    private int wrookcount = 0, brookcount = 0, wknightcount = 0, bknightcount = 0, bbishopcount = 0, wbishopcount = 0, wqueencount = 0, bqueencount = 0, wkingcount = 0, bkingcount = 0;
+
+    public static void main(String[] args) {
+
+        //variable initialization
+        wr01 = new Rook("WR01", "White_Rook.png", 0);
+        wr02 = new Rook("WR02", "White_Rook.png", 0);
+        br01 = new Rook("BR01", "Black_Rook.png", 1);
+        br02 = new Rook("BR02", "Black_Rook.png", 1);
+        wk01 = new Knight("WK01", "White_Knight.png", 0);
+        wk02 = new Knight("WK02", "White_Knight.png", 0);
+        bk01 = new Knight("BK01", "Black_Knight.png", 1);
+        bk02 = new Knight("BK02", "Black_Knight.png", 1);
+        wb01 = new Bishop("WB01", "White_Bishop.png", 0);
+        wb02 = new Bishop("WB02", "White_Bishop.png", 0);
+        bb01 = new Bishop("BB01", "Black_Bishop.png", 1);
+        bb02 = new Bishop("BB02", "Black_Bishop.png", 1);
+        wq = new Queen("WQ", "White_Queen.png", 0);
+        bq = new Queen("BQ", "Black_Queen.png", 1);
+        wk = new King("WK", "White_King.png", 0, 7, 3);
+        bk = new King("BK", "Black_King.png", 1, 0, 3);
+        wp = new Pawn[8];
+        bp = new Pawn[8];
+        for (int i = 0; i < 8; i++) {
+            wp[i] = new Pawn("WP0" + (i + 1), "White_Pawn.png", 0);
+            bp[i] = new Pawn("BP0" + (i + 1), "Black_Pawn.png", 1);
+        }
+
+        //Setting up the board
+        Mainboard = new Main();
+        Mainboard.setVisible(true);
+        Mainboard.setResizable(false);
+    }
+
+    //Constructor
+    private Main() {
+        timeRemaining = 60;
+        timeSlider = new JSlider();
+        move = "White";
+        wname = null;
+        bname = null;
+        winner = null;
+        board = new JPanel(new GridLayout(8, 8));
+        wdetails = new JPanel(new GridLayout(3, 3));
+        bdetails = new JPanel(new GridLayout(3, 3));
+        bcombopanel = new JPanel();
+        wcombopanel = new JPanel();
+        gamecombopanel = new JPanel();
+        Wnames = new ArrayList<String>();
+        Bnames = new ArrayList<String>();
+        board.setMinimumSize(new Dimension(800, 700));
+        ImageIcon img = new ImageIcon(this.getClass().getResource("icon.png"));
+        this.setIconImage(img.getImage());
+
+        //Time Slider Details
+        timeSlider.setMinimum(1);
+        timeSlider.setMaximum(15);
+        timeSlider.setValue(1);
+        timeSlider.setMajorTickSpacing(2);
+        timeSlider.setPaintLabels(true);
+        timeSlider.setPaintTicks(true);
+        timeSlider.addChangeListener(new TimeChange());
+
+
+        //Fetching Details of all Players
+        wplayer = Player.fetch_players();
+        Iterator<Player> witr = wplayer.iterator();
+        while (witr.hasNext())
+            Wnames.add(witr.next().name());
+
+        bplayer = Player.fetch_players();
+        Iterator<Player> bitr = bplayer.iterator();
+        while (bitr.hasNext())
+            Bnames.add(bitr.next().name());
+        WNames = Wnames.toArray(WNames);
+        BNames = Bnames.toArray(BNames);
+
+        board.setBorder(BorderFactory.createLoweredBevelBorder());
+        content = getContentPane();
+        setSize(Width, Height);
+        setTitle("Chess");
+        content.setBackground(Color.black);
+        controlPanel = new JPanel();
+        content.setLayout(new BorderLayout());
+        controlPanel.setLayout(new GridLayout(3, 3));
+        controlPanel.setBorder(BorderFactory.createTitledBorder(null, "Statistics", TitledBorder.TOP, TitledBorder.CENTER, new Font("Lucida Calligraphy", Font.PLAIN, 20), Color.ORANGE));
+
+        //Defining the Player Box in Control Panel
+        WhitePlayer = new JPanel();
+        WhitePlayer.setBorder(BorderFactory.createTitledBorder(null, "White Player", TitledBorder.TOP, TitledBorder.CENTER, new Font("times new roman", Font.BOLD, 18), Color.RED));
+        WhitePlayer.setLayout(new BorderLayout());
+
+        BlackPlayer = new JPanel();
+        BlackPlayer.setBorder(BorderFactory.createTitledBorder(null, "Black Player", TitledBorder.TOP,
+                TitledBorder.CENTER,
+                new Font("times new roman", Font.BOLD, 18), Color.BLUE));
+        BlackPlayer.setLayout(new BorderLayout());
+
+        JPanel whitestats = new JPanel(new GridLayout(3, 3));
+        JPanel blackstats = new JPanel(new GridLayout(3, 3));
+        wcombo = new JComboBox<String>(WNames);
+        bcombo = new JComboBox<String>(BNames);
+        wscroll = new JScrollPane(wcombo);
+        bscroll = new JScrollPane(bcombo);
+        wcombopanel.setLayout(new FlowLayout());
+        bcombopanel.setLayout(new FlowLayout());
+        wselect = new Button("Select");
+        bselect = new Button("Select");
+        wselect.addActionListener(new SelectHandler(0));
+        bselect.addActionListener(new SelectHandler(1));
+        WNewPlayer = new Button("New Player");
+        BNewPlayer = new Button("New Player");
+        WNewPlayer.addActionListener(new Handler(0));
+        BNewPlayer.addActionListener(new Handler(1));
+        wcombopanel.add(wscroll);
+        wcombopanel.add(wselect);
+        wcombopanel.add(WNewPlayer);
+        bcombopanel.add(bscroll);
+        bcombopanel.add(bselect);
+        bcombopanel.add(BNewPlayer);
+        WhitePlayer.add(wcombopanel, BorderLayout.NORTH);
+        BlackPlayer.add(bcombopanel, BorderLayout.NORTH);
+        whitestats.add(new JLabel("Name   :"));
+        whitestats.add(new JLabel("Played :"));
+        whitestats.add(new JLabel("Won    :"));
+        blackstats.add(new JLabel("Name   :"));
+        blackstats.add(new JLabel("Played :"));
+        blackstats.add(new JLabel("Won    :"));
+        WhitePlayer.add(whitestats, BorderLayout.WEST);
+        BlackPlayer.add(blackstats, BorderLayout.WEST);
+        controlPanel.add(WhitePlayer);
+        controlPanel.add(BlackPlayer);
+        
+        JPanel selectmode = new JPanel();
+        selectmode.setBorder(BorderFactory.createTitledBorder(null, "Choose Mode", TitledBorder.TOP, TitledBorder.CENTER, new Font("times new roman", Font.BOLD, 18), Color.MAGENTA));
+        selectmode.setLayout(new GridLayout(3, 3));
+        selectmode.add(timeSlider);
+        gamecombo = new JComboBox<>(gamemodes);
+        gamescroll = new JScrollPane(gamecombo);
+        gameselect = new Button("Select Mode");
+        gameselect.addActionListener(new SelectHandler(3));
+        gamecombopanel.setLayout(new BorderLayout());
+        gamecombopanel.add(gamescroll, BorderLayout.CENTER);
+        gamecombopanel.add(gameselect, BorderLayout.SOUTH);
+        selectmode.add(gamecombopanel);
+
+        controlPanel.add(selectmode);
+        
+        boardsetup();
+        
 		showPlayer=new JPanel(new FlowLayout());  
 		showPlayer.add(timeSlider);
 		JLabel setTime=new JLabel("Set Timer(in mins):"); 
@@ -262,6 +236,8 @@ public class Main extends JFrame implements MouseListener
 		setTime.setFont(new Font("Arial",Font.BOLD,16));
 		label = new JLabel("Time Starts now", JLabel.CENTER);
 		  label.setFont(new Font("SERIF", Font.BOLD, 30));
+		  
+	      //t.start();
 	      displayTime=new JPanel(new FlowLayout());
 	      time=new JPanel(new GridLayout(3,3));
 	      time.add(setTime);
@@ -292,9 +268,219 @@ public class Main extends JFrame implements MouseListener
 		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,temp, controlPanel);
 		
 	    content.add(split);
+		 setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 	
+    public void boardsetup() {
+    	//Defining all the Cells
+        boardState = new Cell[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                P = null;
+                if (chess960) {
+                	if (i == 0 && j == 0)
+                        P = randomPiece("black");
+                    else if (i == 0 && j == 7)
+                    	P = randomPiece("black");
+                    else if (i == 7 && j == 0)
+                    	P = randomPiece("white");
+                    else if (i == 7 && j == 7)
+                    	P = randomPiece("white");
+                    else if (i == 0 && j == 1)
+                    	P = randomPiece("black");
+                    else if (i == 0 && j == 6)
+                    	P = randomPiece("black");
+                    else if (i == 7 && j == 1)
+                    	P = randomPiece("white");
+                    else if (i == 7 && j == 6)
+                    	P = randomPiece("white");
+                    else if (i == 0 && j == 2)
+                    	P = randomPiece("black");
+                    else if (i == 0 && j == 5)
+                    	P = randomPiece("black");
+                    else if (i == 7 && j == 2)
+                    	P = randomPiece("white");
+                    else if (i == 7 && j == 5)
+                    	P = randomPiece("white");
+                    else if (i == 0 && j == 3)
+                    	P = randomPiece("black");
+                    else if (i == 0 && j == 4)
+                    	P = randomPiece("black");
+                    else if (i == 7 && j == 3)
+                    	P = randomPiece("white");
+                    else if (i == 7 && j == 4)
+                    	P = randomPiece("white");
+                    else if (i == 1)
+                        P = bp[j];
+                    else if (i == 6)
+                        P = wp[j];
+                } else {
+                    if (i == 0 && j == 0)
+                        P = br01;
+                    else if (i == 0 && j == 7)
+                        P = br02;
+                    else if (i == 7 && j == 0)
+                        P = wr01;
+                    else if (i == 7 && j == 7)
+                        P = wr02;
+                    else if (i == 0 && j == 1)
+                        P = bk01;
+                    else if (i == 0 && j == 6)
+                        P = bk02;
+                    else if (i == 7 && j == 1)
+                        P = wk01;
+                    else if (i == 7 && j == 6)
+                        P = wk02;
+                    else if (i == 0 && j == 2)
+                        P = bb01;
+                    else if (i == 0 && j == 5)
+                        P = bb02;
+                    else if (i == 7 && j == 2)
+                        P = wb01;
+                    else if (i == 7 && j == 5)
+                        P = wb02;
+                    else if (i == 0 && j == 3)
+                        P = bk;
+                    else if (i == 0 && j == 4)
+                        P = bq;
+                    else if (i == 7 && j == 3)
+                        P = wk;
+                    else if (i == 7 && j == 4)
+                        P = wq;
+                    else if (i == 1)
+                        P = bp[j];
+                    else if (i == 6)
+                        P = wp[j];
+                }
+                cell = new Cell(i, j, P);
+                cell.addMouseListener(this);
+                board.add(cell);
+                boardState[i][j] = cell;
+            }
+    }
+    }
+    
+    private Piece randomPiece(String color) {
+        Piece piece = null;
+
+        while (piece == null) {
+        	Random rand = new Random();
+            int randomnum = rand.nextInt(8);
+            piece = getPiece(color, randomnum);
+        }
+
+        return piece;
+    }
+
+    private Piece getPiece(String color, int randomnum) {
+        if (color.equals("black")) {
+            switch (randomnum) {
+                case 0:
+                    if (brookcount < 2) {
+                        brookcount += 1;
+                        return br01;
+                    }
+                    break;
+                case 1:
+                    if (brookcount < 2) {
+                        brookcount += 1;
+                        return br02;
+                    }
+                    break;
+                case 2:
+                    if (bknightcount < 2) {
+                        bknightcount += 1;
+                        return bk01;
+                    }
+                    break;
+                case 3:
+                    if (bknightcount < 2) {
+                        bknightcount += 1;
+                        return bk02;
+                    }
+                    break;
+                case 4:
+                    if (bbishopcount < 2) {
+                        bbishopcount += 1;
+                        return bb01;
+                    }
+                    break;
+                case 5:
+                    if (bbishopcount < 2) {
+                        bbishopcount += 1;
+                        return bb02;
+                    }
+                    break;
+                case 6:
+                    if (bqueencount < 1) {
+                        bqueencount += 1;
+                        return bq;
+                    }
+                    break;
+                case 7:
+                    if (bkingcount < 1) {
+                        bkingcount += 1;
+                        return bk;
+                    }
+                    break;
+            }
+        } else if (color.equals("white")) {
+            switch (randomnum) {
+                case 0:
+                    if (wrookcount < 2) {
+                        wrookcount += 1;
+                        return wr01;
+                    }
+                    break;
+                case 1:
+                    if (wrookcount < 2) {
+                        wrookcount += 1;
+                        return wr02;
+                    }
+                    break;
+                case 2:
+                    if (wknightcount < 2) {
+                        wknightcount += 1;
+                        return wk01;
+                    }
+                    break;
+                case 3:
+                    if (wknightcount < 2) {
+                        wknightcount += 1;
+                        return wk02;
+                    }
+                    break;
+                case 4:
+                    if (wbishopcount < 2) {
+                        wbishopcount += 1;
+                        return wb01;
+                    }
+                    break;
+                case 5:
+                    if (wbishopcount < 2) {
+                        wbishopcount += 1;
+                        return wb02;
+                    }
+                    break;
+                case 6:
+                    if (wqueencount < 1) {
+                        wqueencount += 1;
+                        return wq;
+                    }
+                    break;
+                case 7:
+                    if (wkingcount < 1) {
+                        wkingcount += 1;
+                        return wk;
+                    }
+                    break;
+            }
+        }
+
+        return null;
+    }
+
 	// A function to change the chance from White Player to Black Player or vice verse
 	// It is made public because it is to be accessed in the Time Class
 	public void changechance()
@@ -310,6 +496,7 @@ public class Main extends JFrame implements MouseListener
 			previous.deselect();
 		previous=null;
 		chance^=1;
+		if(!end)
 		if(!end && timer!=null)
 		{
 			timer.reset();
@@ -480,6 +667,7 @@ public class Main extends JFrame implements MouseListener
 			Black.Update_Player();
 			winner=Black.name();
 		}
+			
 		JOptionPane.showMessageDialog(board,"Checkmate!!!\n"+winner+" wins");
 		WhitePlayer.remove(wdetails);
 		BlackPlayer.remove(bdetails);
@@ -549,6 +737,7 @@ public class Main extends JFrame implements MouseListener
 					if(c.getpiece()!=null)
 						c.removePiece();
 					c.setPiece(previous.getpiece());
+					
 					if (previous.ischeck())
 						previous.removecheck();
 					previous.removePiece();
@@ -689,6 +878,21 @@ public class Main extends JFrame implements MouseListener
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
+				if(color == 3) {
+					String selectedMode = (String) gamecombo.getSelectedItem();
+		                switch (selectedMode) {
+		                    case "normal":
+		                        chess960 = false;
+		                        board = new JPanel(new GridLayout(8, 8));
+		                        boardsetup();
+		                        break;
+		                    case "chess960":
+		                        chess960 = true;
+		                        board = new JPanel(new GridLayout(8, 8));
+		                        boardsetup();
+		                        break;
+		                }
+				}else {
 				// TODO Auto-generated method stub
 				tempPlayer=null;
 				String n=(color==0)?wname:bname;
@@ -742,7 +946,7 @@ public class Main extends JFrame implements MouseListener
 			}
 			
 		}
-		
+	}
 		
 		
 		class Handler implements ActionListener{
