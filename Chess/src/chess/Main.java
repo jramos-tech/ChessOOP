@@ -30,56 +30,66 @@ import java.util.Random;
  */
 
 public class Main extends JFrame implements MouseListener {
-    private static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 1L;
 
     //Variable Declaration
-    private static final int Height = 700;
-    private static final int Width = 1110;
-    private static Rook wr01, wr02, br01, br02;
-    private static Knight wk01, wk02, bk01, bk02;
-    private static Bishop wb01, wb02, bb01, bb02;
-    private static Pawn wp[], bp[];
-    private static Queen wq, bq;
-    private static King wk, bk;
-    private Cell c, previous;
-    private int chance = 0;
-    private Cell boardState[][];
-    private ArrayList<Cell> destinationlist = new ArrayList<Cell>();
-    private Player White = null, Black = null;
-    private JPanel board = new JPanel(new GridLayout(8, 8));
-    private JPanel wdetails = new JPanel(new GridLayout(3, 3));
-    private JPanel bdetails = new JPanel(new GridLayout(3, 3));
-    private JPanel wcombopanel = new JPanel();
-    private JPanel bcombopanel = new JPanel();
-    private JPanel gamecombopanel = new JPanel();
-    private JPanel controlPanel, WhitePlayer, BlackPlayer, temp, displayTime, showPlayer, time;
-    private JSplitPane split;
-    private JLabel label, mov;
-    private static JLabel CHNC;
-    private Time timer;
+    public static final int Height = 700;
+    public static final int Width = 1110;
+    public static Rook wr01, wr02, br01, br02;
+    public static Knight wk01, wk02, bk01, bk02;
+    public static Bishop wb01, wb02, bb01, bb02;
+    public static Pawn wp[], bp[];
+    public static Queen wq, bq;
+    public static King wk, bk;
+    public Cell c, previous;
+    public int chance = 0;
+    public Cell boardState[][];
+    public ArrayList<Cell> destinationlist = new ArrayList<Cell>();
+    public Player White = null, Black = null;
+    public JPanel board = new JPanel(new GridLayout(8, 8));
+    public JPanel wdetails = new JPanel(new GridLayout(3, 3));
+    public JPanel bdetails = new JPanel(new GridLayout(3, 3));
+    public JPanel wcombopanel = new JPanel();
+    public JPanel bcombopanel = new JPanel();
+    public JPanel gamecombopanel = new JPanel();
+    public JPanel controlPanel, WhitePlayer, BlackPlayer, temp, displayTime, showPlayer, time;
+    public JSplitPane split;
+    public JLabel label, mov;
+    public static JLabel CHNC;
+    public Time timer;
     public static Main Mainboard;
-    private boolean selected = false, end = false, chess960 = false;
-    private Container content;
-    private ArrayList<Player> wplayer, bplayer;
-    private ArrayList<String> Wnames = new ArrayList<String>();
-    private ArrayList<String> Bnames = new ArrayList<String>();
-    private JComboBox<String> wcombo, bcombo, gamecombo;
-    private String wname = null, bname = null, winner = null;
+    public boolean selected = false, end = false;
+
+	public boolean chess960 = false;
+	public Container content;
+	public ArrayList<Player> wplayer, bplayer;
+	public ArrayList<String> Wnames = new ArrayList<String>();
+	public ArrayList<String> Bnames = new ArrayList<String>();
+	public JComboBox<String> wcombo, bcombo, gamecombo;
+	public String wname = null, bname = null, winner = null;
     static String move;
-    private Player tempPlayer;
-    private JScrollPane wscroll, bscroll, gamescroll;
-    private String[] WNames = {}, BNames = {}, gamemodes = {"normal", "chess960"};
-    private JSlider timeSlider;
-    private BufferedImage image;
-    private Button start, wselect, bselect, gameselect, WNewPlayer, BNewPlayer;
+    public Player tempPlayer;
+    public JScrollPane wscroll, bscroll, gamescroll;
+    public String[] WNames = {}, BNames = {}, gamemodes = {"normal", "chess960"};
+    public JSlider timeSlider;
+    public BufferedImage image;
+    public Button start, wselect, bselect, gameselect, WNewPlayer, BNewPlayer;
     public static int timeRemaining = 60;
     public Cell cell;
     pieces.Piece P;
-    private int wrookcount = 0, brookcount = 0, wknightcount = 0, bknightcount = 0, bbishopcount = 0, wbishopcount = 0, wqueencount = 0, bqueencount = 0, wkingcount = 0, bkingcount = 0;
+    public int wrookcount = 0, brookcount = 0, wknightcount = 0, bknightcount = 0, bbishopcount = 0, wbishopcount = 0, wqueencount = 0, bqueencount = 0, wkingcount = 0, bkingcount = 0;
 
     public static void main(String[] args) {
 
-        //variable initialization
+        //Setting up the board
+        Mainboard = new Main();
+        Mainboard.setVisible(true);
+        Mainboard.setResizable(false);
+    }
+
+    //Constructor
+    public Main() {
+    	 //variable initialization
         wr01 = new Rook("WR01", "White_Rook.png", 0);
         wr02 = new Rook("WR02", "White_Rook.png", 0);
         br01 = new Rook("BR01", "Black_Rook.png", 1);
@@ -102,15 +112,6 @@ public class Main extends JFrame implements MouseListener {
             wp[i] = new Pawn("WP0" + (i + 1), "White_Pawn.png", 0);
             bp[i] = new Pawn("BP0" + (i + 1), "Black_Pawn.png", 1);
         }
-
-        //Setting up the board
-        Mainboard = new Main();
-        Mainboard.setVisible(true);
-        Mainboard.setResizable(false);
-    }
-
-    //Constructor
-    private Main() {
         timeRemaining = 60;
         timeSlider = new JSlider();
         move = "White";
@@ -361,7 +362,7 @@ public class Main extends JFrame implements MouseListener {
     }
     }
     
-    private Piece randomPiece(String color) {
+    public Piece randomPiece(String color) {
         Piece piece = null;
 
         while (piece == null) {
@@ -373,7 +374,7 @@ public class Main extends JFrame implements MouseListener {
         return piece;
     }
 
-    private Piece getPiece(String color, int randomnum) {
+    public Piece getPiece(String color, int randomnum) {
         if (color.equals("black")) {
             switch (randomnum) {
                 case 0:
